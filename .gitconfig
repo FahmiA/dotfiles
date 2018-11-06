@@ -1,0 +1,5 @@
+[user]
+	email = findfahmi@gmail.com
+	name = Fahmi Abdulhamid
+[core]
+	excludesfile = /home/fahmi/.gitignore

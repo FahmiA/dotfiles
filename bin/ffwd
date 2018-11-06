@@ -1,0 +1,42 @@
+#!/bin/bash
+
+die () {
+    echo "${1:-$(cat)}"
+    exit ${2:-1}
+}
+
+print_usage () {
+    die '' 2 <<EOF
+Usage: $(basename "${0}") [branch]
+EOF
+}
+
+current_branch="$(git branch | sed -n '/^\*/{s,^\*\s*,,p}')"
+target_branch="${1:-${current_branch}}"
+
+git branch | grep -qE "^\*?\s*${target_branch}\s*$" || \
+    die "No local branch '${target_branch}'"
+
+unstash=
+if ! git diff-index --quiet HEAD -- 2>/dev/null
+then
+    git stash
+    unstash=1
+fi
+
+if [ "${current_branch}" != "${target_branch}" ]
+then
+    git checkout "${target_branch}"
+fi
+
+git pull --rebase
+
+if [ "${current_branch}" != "${target_branch}" ]
+then
+    git checkout "${current_branch}"
+fi
+
+if [ -n "${unstash}" ]
+then
+    git stash pop
+fi
